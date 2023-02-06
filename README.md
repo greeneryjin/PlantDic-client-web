@@ -51,3 +51,28 @@ public class FilterDto {
     }
 }
 ````
+
+필터를 처리하는 로직
+```java
+    @Override
+    public Page<MyGardenDtl> searchFilter(Pageable pageable, FilterDto filter) {
+        QueryResults<MyGardenDtl> queryResults = queryFactory
+                .selectFrom(myGardenDtl)
+                .where(filterSum(filter.getClCode(), filter.getLighttdemanddoCode(), filter.getHdCode(), filter.getGrwhTpCode()
+                        ,filter.getLefcolrCode(), filter.getLefmrkCode(), filter.getManagelevelCode(), filter.getPostngplaceCode()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+        List<MyGardenDtl> content = queryResults.getResults();
+        long total = queryResults.getTotal();
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    private BooleanBuilder clCode(String clCode) {
+        if(clCode == null) {
+            return new BooleanBuilder();
+        }else {
+            return new BooleanBuilder(myGardenDtl.clCode.contains(clCode));
+        }
+    }
+```
