@@ -1,0 +1,48 @@
+name: deploy
+
+on:
+  push:
+    branches: [master, develop]
+
+jobs:
+  deploy_to_prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run scripts in server
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          script: |
+            cd grnr-server
+            git reset --hard
+            git fetch
+            git pull
+            chmod +x gradlew
+            ./gradlew clean bootjar
+            cd ~/greenery-db-nginx
+            docker-compose up --build -d
+    if: contains(github.ref, 'master')
+
+  deploy_to_dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run scripts in server
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          script: |
+            cd grnr-server-develop
+            git reset --hard
+            git fetch
+            git pull
+            chmod +x gradlew
+            ./gradlew clean bootjar
+            cd ~/greenery-db-nginx
+            docker-compose up --build -d
+    if: contains(github.ref, 'develop')
