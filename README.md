@@ -1,10 +1,11 @@
-# 식물 사전 사이트(client)
+# [식물 사전](https://www.notion.so/cea50616f805494b9018a1494b43b282?p=3cf48925dea944509d2b935460c3c670&pm=c)
 Querydsl를 사용한 동적 필터 식물사전 사이트 개발
 
 
 사용 언어
 ```
 - JAVA 8
+- js
 ```
 
 사용 기술
