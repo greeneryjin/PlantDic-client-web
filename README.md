@@ -112,7 +112,9 @@ public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
 
 #### 트러블 슈팅
 1. CORS 문제
-React, Spring Boot에서 자원을 요청할 때 두 자원의 리소스 출처가 다르면 발생하는 문제로 서버에서 요청을 차단하는 것입니다. 
+React, Spring Boot에서 자원을 요청할 때 두 자원의 리소스 출처가 다르면 발생하는 문제로 서버에서 요청을 차단하는 것입니다.
+
+수정된 코드 
 ```JAVA
 @Configuration
 public class CorsConfig {
@@ -138,6 +140,43 @@ public class CorsConfig {
 
 2. JSON 직렬화 순환 참조
 1:N일 때 Entity를 직접 조회했을 때 발생했습니다.
+```java
+@Entity
+@Getter @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class MyGardenDtl {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "myGardendtl_id")
+    private Long id;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "myGardenDtl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MyGardenDtlPicture> myGardenDtlPictures = new ArrayList<>();
+
+    //병충해 정보
+    @OneToMany(mappedBy = "myGardenDtl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Pest> pests = new ArrayList<>();
+```
+MyGardenDtl -> pests 직렬화 -> pests 내부 MyGardenDtl 직렬화
+: 무한 순환 반복 
+
+
+해결 방법
+DTO 사용 
+```JAVA
+public Header<PestDto> pestUpdate(@PathVariable("id")Long id,@RequestBody PestSaveDto pestSaveDto){
+     Pest pest = mygardenAdminService.pestUpdate(id, pestSaveDto);
+     PestDto pestDto = PestDto.of(pest);
+     return Header.OK(pestDto);
+}
+
+public static PestDto of(Pest pest){
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(pest, PestDto.class);
+}
+```
 
 
 완성된 웹사이트 
