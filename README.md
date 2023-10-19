@@ -83,6 +83,61 @@ public class FilterDto {
         }
     }
 ```
+#### 코드 리팩토링
+@PutMapping 사용 시 추가로 저장하는 것을 수정함 
+##### 기존 코드
+```JAVA
+//식물 사전 수정 전
+@Transactional
+public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
+   PlantDic plantDic = findByPlantId(id);
+   plantDic.changePlant(plantChangeDto);
+   plantDicRepository.save(plantDic);
+   return plantDic;
+}
+```
+데이터를 수정하기 위해 @Transactional를 넣고 다시 save()를 사용했습니다. 
+하지만 Spring data JPA에서는 변경 감지를 사용하기 때문에 다시 저장할 필요가 없습니다. 
+
+##### 수정된 코드
+```JAVA
+//식물 사전 수정 후
+@Transactional
+public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
+    PlantDic plantDic = findByPlantId(id);
+    plantDic.changePlant(plantChangeDto);
+    return plantDic;
+}
+```
+
+#### 트러블 슈팅
+1. CORS 문제
+React, Spring Boot에서 자원을 요청할 때 두 자원의 리소스 출처가 다르면 발생하는 문제로 서버에서 요청을 차단하는 것입니다. 
+```JAVA
+@Configuration
+public class CorsConfig {
+
+    @Bean
+    public CorsConfigurationSource corsFilter(){
+
+        //자바스크립트로 요청이 오면 처리
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedOriginPattern("*");
+        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","PATCH","OPTIONS","DELETE"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+```
+원래는 configuration.allowedOrigins를 사용했으나 시큐리티에서 찍힌 로그를 보니 configuration.addAllowedOriginPattern로 변경해서 사용해야 정상 작동한다고 합니다. 
+
+2. JSON 직렬화 순환 참조
+1:N일 때 Entity를 직접 조회했을 때 발생했습니다.
 
 
 완성된 웹사이트 
