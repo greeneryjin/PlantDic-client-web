@@ -1,31 +1,26 @@
 # [식물 사전](https://www.notion.so/cea50616f805494b9018a1494b43b282?p=3cf48925dea944509d2b935460c3c670&pm=c)
 Querydsl를 사용한 동적 필터 식물사전 사이트 개발
 
+### 목차 
+[1. 기능 및 핵심 코드](#important)
 
-사용 언어
-```
-- JAVA 8
-- js
-```
 
-사용 기술
-```
-- springboot
-- Mysql
-- Querydsl
-- jpa
-```
+[2. 트러블 슈팅](#troubleshooting) 
 
-라이브러리
-```
-- lombok
-- gradle
-- react
-```
 
+[3. 리팩토링](#refactoring)
+
+
+[4. 사용한 개발 도구 및 라이브러리](#tool)
+
+
+[5. 완성된 App 이미지](#image)
+
+# important
+#### 기능
+- 여러 필터 기능을 선택하여 식물을 조회함 
 필터 목록
 - 분류, 광도, 습도, 온도, 잎색, 잎 무늬, 난이도, 장소 
-
 
 
 동적 필터를 받아오는 dto
@@ -83,34 +78,9 @@ public class FilterDto {
         }
     }
 ```
-#### 코드 리팩토링
-@PutMapping 사용 시 추가로 저장하는 것을 수정함 
-##### 기존 코드
-```JAVA
-//식물 사전 수정 전
-@Transactional
-public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
-   PlantDic plantDic = findByPlantId(id);
-   plantDic.changePlant(plantChangeDto);
-   plantDicRepository.save(plantDic);
-   return plantDic;
-}
-```
-데이터를 수정하기 위해 @Transactional를 넣고 다시 save()를 사용했습니다. 
-하지만 Spring data JPA에서는 변경 감지를 사용하기 때문에 다시 저장할 필요가 없습니다. 
 
-##### 수정된 코드
-```JAVA
-//식물 사전 수정 후
-@Transactional
-public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
-    PlantDic plantDic = findByPlantId(id);
-    plantDic.changePlant(plantChangeDto);
-    return plantDic;
-}
-```
+# troubleshooting
 
-#### 트러블 슈팅
 1. CORS 문제
 React, Spring Boot에서 자원을 요청할 때 두 자원의 리소스 출처가 다르면 발생하는 문제로 서버에서 요청을 차단하는 것입니다.
 
@@ -178,7 +148,56 @@ public static PestDto of(Pest pest){
 }
 ```
 
+# refactoring
+@PutMapping 사용 시 추가로 저장하는 것을 수정함 
+##### 기존 코드
+```JAVA
+//식물 사전 수정 전
+@Transactional
+public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
+   PlantDic plantDic = findByPlantId(id);
+   plantDic.changePlant(plantChangeDto);
+   plantDicRepository.save(plantDic);
+   return plantDic;
+}
+```
+데이터를 수정하기 위해 @Transactional를 넣고 다시 save()를 사용했습니다. 
+하지만 Spring data JPA에서는 변경 감지를 사용하기 때문에 다시 저장할 필요가 없습니다. 
 
+##### 수정된 코드
+```JAVA
+//식물 사전 수정 후
+@Transactional
+public PlantDic updatePlant(Long id, PlantChangeDto plantChangeDto){
+    PlantDic plantDic = findByPlantId(id);
+    plantDic.changePlant(plantChangeDto);
+    return plantDic;
+}
+```
+
+# tool
+사용 언어
+```
+- JAVA 8
+- js
+```
+
+사용 기술
+```
+- springboot
+- Mysql
+- Querydsl
+- jpa
+```
+
+라이브러리
+```
+- lombok
+- gradle
+- react
+```
+
+# image
 완성된 웹사이트 
 <img width="1000" alt="사진" src="https://user-images.githubusercontent.com/87289562/216971512-6f2b4181-82cc-4f53-9d23-5c4b24bafd21.png">
 
